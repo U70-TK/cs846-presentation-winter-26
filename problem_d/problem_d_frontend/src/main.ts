@@ -181,6 +181,31 @@ app.innerHTML = `
           </div>
         </div>
       </div>
+      <div class="dashboard-card audit-card">
+        <div class="card-header">
+          <h3>Audit Log Review</h3>
+          <span class="pill">JWT required</span>
+        </div>
+        <p class="muted">
+          Sign in with a role account and fetch the logs you are authorized to review.
+        </p>
+        <form id="audit-login-form" class="audit-form">
+          <label class="audit-field">
+            Email
+            <input id="audit-email" type="email" value="jordan@northwind.ai" required />
+          </label>
+          <label class="audit-field">
+            Password
+            <input id="audit-password" type="password" value="password123" required />
+          </label>
+          <button class="button" type="submit">Login + Load Logs</button>
+        </form>
+        <p id="audit-user" class="panel-label">Not authenticated</p>
+        <p id="audit-status" class="panel-label">No audit query has run yet.</p>
+        <div id="audit-log-list" class="card-list">
+          <p class="muted">Audit rows will appear here.</p>
+        </div>
+      </div>
     </section>
 
     <section id="pricing" class="section">
@@ -302,6 +327,19 @@ type Project = {
   updatedAt: string;
 };
 type Invoice = { id: string; amount: number; status: string; issuedAt: string };
+type LoginResponse = {
+  token: string;
+  user: { id: string; name: string; email: string; role: string; organizationId: string };
+};
+type AuditLog = {
+  id: string;
+  projectId: string | null;
+  eventType: string;
+  severity: string;
+  actorName: string;
+  occurredAt: string;
+  isSensitive: number;
+};
 
 const renderList = (id: string, items: string[]) => {
   const node = document.getElementById(id);
@@ -356,3 +394,92 @@ const loadDashboard = async () => {
 };
 
 loadDashboard();
+
+let auditToken = '';
+
+const setAuditStatus = (message: string) => {
+  updateText('audit-status', message);
+};
+
+const setAuditUser = (message: string) => {
+  updateText('audit-user', message);
+};
+
+const loadAuditLogs = async () => {
+  if (!auditToken) {
+    setAuditStatus('Please login first.');
+    return;
+  }
+
+  setAuditStatus('Loading audit logs...');
+  try {
+    const res = await fetch('/api/review-audit-log', {
+      headers: {
+        Authorization: `Bearer ${auditToken}`,
+      },
+    });
+
+    if (!res.ok) {
+      setAuditStatus(`Audit request failed (${res.status}).`);
+      return;
+    }
+
+    const logs: AuditLog[] = await res.json();
+    setAuditStatus(`Loaded ${logs.length} audit log entries.`);
+    renderList(
+      'audit-log-list',
+      logs.map(
+        (log) =>
+          `${log.occurredAt} · ${log.eventType} · ${log.severity} · actor: ${log.actorName} · project: ${
+            log.projectId ?? 'n/a'
+          } · sensitive: ${log.isSensitive === 1 ? 'yes' : 'no'}`
+      )
+    );
+  } catch {
+    setAuditStatus('Audit request failed. Check backend availability.');
+  }
+};
+
+const setupAuditPanel = () => {
+  const form = document.getElementById('audit-login-form') as HTMLFormElement | null;
+  const emailInput = document.getElementById('audit-email') as HTMLInputElement | null;
+  const passwordInput = document.getElementById('audit-password') as HTMLInputElement | null;
+
+  if (!form || !emailInput || !passwordInput) {
+    return;
+  }
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    setAuditStatus('Authenticating...');
+
+    try {
+      const loginRes = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: emailInput.value.trim(),
+          password: passwordInput.value,
+        }),
+      });
+
+      if (!loginRes.ok) {
+        setAuditUser('Not authenticated');
+        setAuditStatus(`Login failed (${loginRes.status}).`);
+        return;
+      }
+
+      const loginData: LoginResponse = await loginRes.json();
+      auditToken = loginData.token;
+      setAuditUser(
+        `Authenticated as ${loginData.user.name} (${loginData.user.role}, ${loginData.user.email})`
+      );
+      await loadAuditLogs();
+    } catch {
+      setAuditUser('Not authenticated');
+      setAuditStatus('Login request failed. Check backend availability.');
+    }
+  });
+};
+
+setupAuditPanel();
