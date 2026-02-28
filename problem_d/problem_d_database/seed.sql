@@ -15,3 +15,6 @@ INSERT INTO invoices (id, organization_id, amount, status, issued_at) VALUES
 
 INSERT INTO usage_summary (id, ingestion_gb, model_calls, team_seats, last_sync) VALUES
   ('usage_001', 182.4, 120340, 18, '2026-02-26T17:04:00.000Z');
+
+INSERT INTO audit_log (id, event, created_at) VALUES
+  ('audit_001', 'System initialized', '2026-02-01T08:00:00.000Z');
