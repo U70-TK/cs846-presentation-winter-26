@@ -180,6 +180,17 @@ app.innerHTML = `
             <p class="muted">Loading invoices...</p>
           </div>
         </div>
+        <div class="dashboard-card">
+          <div class="card-header">
+            <h3>Audit log</h3>
+            <span class="pill warning">Audited</span>
+          </div>
+          <div id="audit-list" class="card-list">
+            <p class="muted">Loading audit log...</p>
+          </div>
+          <button id="audit-btn" class="button ghost">Audit</button>
+          <p id="simulate-status" class="muted"></p>
+        </div>
       </div>
     </section>
 
@@ -302,6 +313,7 @@ type Project = {
   updatedAt: string;
 };
 type Invoice = { id: string; amount: number; status: string; issuedAt: string };
+type AuditEntry = { id: string; event: string; createdAt: string };
 
 const renderList = (id: string, items: string[]) => {
   const node = document.getElementById(id);
@@ -313,10 +325,11 @@ const renderList = (id: string, items: string[]) => {
 
 const loadDashboard = async () => {
   try {
-    const [orgRes, projectRes, invoiceRes] = await Promise.all([
+    const [orgRes, projectRes, invoiceRes, auditRes] = await Promise.all([
       fetch('/api/organizations'),
       fetch('/api/projects'),
       fetch('/api/billing/invoices'),
+      fetch('/api/usage/audit-log'),
     ]);
 
     if (orgRes.ok) {
@@ -350,9 +363,44 @@ const loadDashboard = async () => {
         )
       );
     }
+
+    if (auditRes.ok) {
+      const entries: AuditEntry[] = await auditRes.json();
+      renderList(
+        'audit-list',
+        entries.map(
+          (entry) => `${entry.event} · ${new Date(entry.createdAt).toLocaleString()}`
+        )
+      );
+    }
   } catch {
     // Non-blocking: keep placeholders if API is unavailable.
   }
 };
 
 loadDashboard();
+
+const auditButton = document.getElementById('audit-btn');
+const auditStatus = document.getElementById('simulate-status');
+
+auditButton?.addEventListener('click', async () => {
+  if (!auditStatus) {
+    return;
+  }
+  auditStatus.textContent = 'Triggering audit event...';
+  try {
+    const res = await fetch('/api/usage/audit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: 'Audit event triggered.' }),
+    });
+    if (!res.ok) {
+      auditStatus.textContent = 'Failed to trigger audit event.';
+      return;
+    }
+    auditStatus.textContent = 'Audit event recorded in audit log.';
+    loadDashboard();
+  } catch {
+    auditStatus.textContent = 'Backend unavailable.';
+  }
+});

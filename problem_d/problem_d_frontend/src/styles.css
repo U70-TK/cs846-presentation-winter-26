@@ -259,6 +259,10 @@ a {
   box-shadow: 0 12px 24px rgba(27, 27, 27, 0.08);
 }
 
+.dashboard-card .button {
+  align-self: flex-start;
+}
+
 .card-header {
   display: flex;
   align-items: center;
