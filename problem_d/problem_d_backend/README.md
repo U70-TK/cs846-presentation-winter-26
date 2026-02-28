@@ -22,10 +22,11 @@ The backend reads from a local SQLite file.
 
 - `GET /health`
 - `POST /auth/login`
-- `GET /auth/me`
+- `GET /auth/me` (JWT required)
 - `GET /projects`
 - `POST /projects`
 - `GET /organizations`
 - `GET /billing/plans`
 - `GET /billing/invoices`
 - `GET /usage/summary`
+- `GET /review-audit-log` (JWT required, role-scoped visibility)
