@@ -259,6 +259,39 @@ a {
   box-shadow: 0 12px 24px rgba(27, 27, 27, 0.08);
 }
 
+.audit-card {
+  grid-column: 1 / -1;
+}
+
+.audit-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  align-items: end;
+}
+
+.audit-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.audit-field input {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--ink);
+  padding: 10px 12px;
+  font-size: 0.95rem;
+}
+
+.audit-field input:focus {
+  outline: 2px solid rgba(31, 75, 143, 0.28);
+  border-color: var(--accent);
+}
+
 .card-header {
   display: flex;
   align-items: center;
