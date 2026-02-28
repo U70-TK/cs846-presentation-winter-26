@@ -75,6 +75,22 @@ app.innerHTML = `
       </div>
     </section>
 
+    <section id="report" class="section report-section">
+      <div class="section-header">
+        <p class="eyebrow">Company Briefing</p>
+        <h2>Generate a compact report for last year.</h2>
+        <p class="section-lead">Pulls live billing, usage, and project data from the backend.</p>
+      </div>
+      <div class="report-card">
+        <div class="report-controls">
+          <button class="button" id="report-generate">Generate report</button>
+          <span class="pill" id="report-year">Last year</span>
+        </div>
+        <p class="muted" id="report-status">Click generate to load the report.</p>
+        <div id="report-content" class="report-content"></div>
+      </div>
+    </section>
+
     <section id="product" class="section">
       <div class="section-header">
         <p class="eyebrow">Platform modules</p>
@@ -269,6 +285,83 @@ const updateText = (id: string, value: string) => {
   }
 };
 
+const RenderReport = (payload: any) => {
+  const container = document.getElementById('report-content');
+  if (!container) {
+    return;
+  }
+  if (!payload) {
+    container.innerHTML = '';
+    return;
+  }
+  container.innerHTML = `
+    <div class="report-header">
+      <h3>${payload.headline ?? 'Company Report'}</h3>
+      <span class="pill">Year ${payload.year ?? ''}</span>
+    </div>
+    <p class="report-narrative">${payload.narrative ?? ''}</p>
+    <div class="report-metrics">
+      ${(payload.keyMetrics ?? [])
+        .map(
+          (metric: any) => `
+        <div class="report-metric">
+          <p class="report-label">${metric.label}</p>
+          <p class="report-value">${metric.value}</p>
+        </div>`
+        )
+        .join('')}
+    </div>
+    <ul class="report-list">
+      ${(payload.summaryPoints ?? []).map((item: any) => `<li>${item}</li>`).join('')}
+    </ul>
+  `;
+};
+
+const LoadReport = (): any => {
+  const lastYear: any = new Date().getFullYear() - 1;
+  const reportButton: any = document.getElementById('report-generate') as HTMLButtonElement | null;
+  const ReportYear: any = document.getElementById('report-year');
+  const reportStatus: any = document.getElementById('report-status');
+
+  let ReportData: any = null;
+  const setreportData: any = (value: any) => {
+    ReportData = value;
+    RenderReport(ReportData);
+  };
+
+  if (reportButton) {
+    reportButton.textContent = `Generate ${lastYear} Report`;
+  }
+  if (ReportYear) {
+    ReportYear.textContent = `Last year: ${lastYear}`;
+  }
+
+  reportButton?.addEventListener('click', async () => {
+    if (reportStatus) {
+      reportStatus.textContent = 'Generating report...';
+    }
+    try {
+      const res: any = await fetch(`/api/reports/company?organizationId=org_001&year=${lastYear}`);
+      const data: any = await res.json();
+      setreportData(data);
+      if (reportStatus) {
+        reportStatus.textContent = 'Report ready.';
+      }
+    } catch (error: any) {
+      setreportData({
+        headline: `Northwind AI — ${lastYear} Annual Snapshot`,
+        year: lastYear,
+        narrative: 'Unable to reach the backend service.',
+        keyMetrics: [],
+        summaryPoints: ['Check that the API server is running on port 4000.'],
+      });
+      if (reportStatus) {
+        reportStatus.textContent = 'Failed to load report.';
+      }
+    }
+  });
+};
+
 const loadUsage = async () => {
   try {
     const res = await fetch('/api/usage/summary');
@@ -292,6 +385,7 @@ const loadUsage = async () => {
 };
 
 loadUsage();
+LoadReport();
 
 type Org = { id: string; name: string; region: string; seats: number };
 type Project = {
