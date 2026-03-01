@@ -1,7 +1,7 @@
 name: Dependency Review
 
 on:
-  push:
+  pull_request:
     branches:
       - feat-generate-report-dependency
     paths:
@@ -9,6 +9,7 @@ on:
       - 'problem_d/problem_d_backend/package-lock.json'
       - 'problem_d/problem_d_frontend/package.json'
       - 'problem_d/problem_d_frontend/package-lock.json'
+  workflow_dispatch:
 
 permissions:
   contents: read
