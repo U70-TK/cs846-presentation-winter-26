@@ -1,0 +1,19 @@
+name: Dependency Review
+
+on:
+  pull_request:
+    paths:
+      - 'problem_d/problem_d_backend/package.json'
+      - 'problem_d/problem_d_backend/package-lock.json'
+      - 'problem_d/problem_d_frontend/package.json'
+      - 'problem_d/problem_d_frontend/package-lock.json'
+
+permissions:
+  contents: read
+
+jobs:
+  dependency-review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/dependency-review-action@v4
