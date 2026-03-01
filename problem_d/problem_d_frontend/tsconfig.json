@@ -1,12 +1,7 @@
 {
+  "extends": "./tsconfig.app.json",
   "compilerOptions": {
-    "target": "ES2020",
-    "useDefineForClassFields": true,
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
-    "strict": true,
-    "isolatedModules": true,
-    "noEmit": true
+    "types": ["vite/client", "react", "react-dom"]
   },
   "include": ["src"]
 }
