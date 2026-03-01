@@ -1,7 +1,9 @@
 name: Dependency Review
 
 on:
-  pull_request:
+  push:
+    branches:
+      - feat-generate-report-dependency
     paths:
       - 'problem_d/problem_d_backend/package.json'
       - 'problem_d/problem_d_backend/package-lock.json'
