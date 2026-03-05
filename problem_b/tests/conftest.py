@@ -9,8 +9,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from main import app
 
 
-@pytest.fixture(autouse=True)
-def _test_env(tmp_path, monkeypatch):
+@pytest.fixture()
+def auth_env(tmp_path, monkeypatch):
     monkeypatch.setenv("AUTH_DB_PATH", str(tmp_path / "test_auth.db"))
     monkeypatch.setenv(
         "AUTH_JWT_SECRET",
@@ -19,6 +19,6 @@ def _test_env(tmp_path, monkeypatch):
 
 
 @pytest.fixture()
-def client(_test_env):
+def client(auth_env):
     with TestClient(app) as test_client:
         yield test_client

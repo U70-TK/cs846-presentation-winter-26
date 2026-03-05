@@ -9,6 +9,7 @@ from fastapi import Depends, FastAPI, HTTPException, status
 from pydantic import BaseModel
 
 import auth
+import user_helpers
 from database import get_db_connection, init_db
 from seed import seed_users
 
@@ -21,6 +22,7 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(title="Auth Service", version="1.0.0", lifespan=lifespan)
+app.include_router(user_helpers.router)
 
 
 class LoginRequest(BaseModel):

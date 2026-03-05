@@ -4,12 +4,15 @@ import sys
 from datetime import datetime, timedelta, timezone
 
 import jwt
+import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 import auth
 from database import get_db_path, init_db
 from seed import SEED_USERS, seed_users
+
+pytestmark = pytest.mark.usefixtures("auth_env")
 
 
 def test_schema_and_seed_data_created():
