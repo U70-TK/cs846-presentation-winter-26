@@ -29,3 +29,4 @@ The backend reads from a local SQLite file.
 - `GET /billing/plans`
 - `GET /billing/invoices`
 - `GET /usage/summary`
+- `GET /usage/audit`

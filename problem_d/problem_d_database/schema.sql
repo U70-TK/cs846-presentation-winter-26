@@ -33,3 +33,9 @@ CREATE TABLE IF NOT EXISTS usage_summary (
   team_seats INTEGER NOT NULL,
   last_sync TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS audit_log (
+  id TEXT PRIMARY KEY,
+  event TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);

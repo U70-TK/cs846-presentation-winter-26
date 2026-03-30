@@ -7,8 +7,5 @@ This problem contains a demo SaaS website with a NestJS backend, a React fronten
 - `problem_d_database/` SQLite database location.
 
 ## Notes
-
-- Backend uses `problem_d_database/northwind_signal.sqlite` by default.
-- Frontend expects backend on `http://localhost:4000`.
 - The backend uses in-memory demo data for now.
 - The database folder is a placeholder for the experiment's SQLite file.
